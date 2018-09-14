@@ -10,6 +10,12 @@ available_arguments = dict([(k, "-%s %s") for k in one_minus] + [(k, "--%s %s") 
 default_arguments = dict(format="qbsolv", values="ints")
 
 class QmasmWrapper(object):
+    def __init__(self):
+        self._help = None
+
+    def get_help(self):
+        if self._help is None: self._help = self._run_command('qmasm --help')
+        return self._help
 
     def process_args(self, given_args):
         args = dict(**default_arguments)
@@ -25,7 +31,10 @@ class QmasmWrapper(object):
     def index(self, **query_args):
         try:
             if cherrypy.request.method != 'POST':
-                return "Expecting a post with qmasm file as body"
+                if 'help' in query_args:
+                    return self.get_help() 
+                else:
+                    return "Expecting a post with qmasm file as body"
 
             qmasm_arguments = " ".join(self.process_args(query_args))
             print "qmasm args %s" % qmasm_arguments
@@ -37,7 +46,7 @@ class QmasmWrapper(object):
             command = 'qmasm %s %s' % (filename, qmasm_arguments)
             print "launching %s" % command
 
-            output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+            output = self._run_command(command)
             os.remove(filename)
             return output
 
@@ -45,6 +54,9 @@ class QmasmWrapper(object):
             traceback.print_exc(file=sys.stdout)
             cherrypy.response.status = 500
             return e.output
+
+    def _run_command(self, command):
+        return subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
 
 if __name__ == '__main__':
     cherrypy.server.socket_host = "0.0.0.0"
