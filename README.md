@@ -41,10 +41,19 @@ __Important__:
 curl "http://localhost?help"
 
 # run "qmasm -q --run somefile.qmasm"
-curl --data-binary "@somefile.qmasm" "http://localhost/?run=&q=" > somefile.qmasm.out
+curl -H 'Content-Type: text/plain' \
+     --data-binary "@somefile.qmasm" \
+     "http://localhost/?run=&q=" > somefile.qmasm.out
 
 # run "qmasm --format=qubist --run somefile.qmasm"
-curl --data-binary "@somefile.qmasm" "http://localhost/?format=qubist&run=" > somefile.qmasm.out
+curl -H 'Content-Type: text/plain' \
+     --data-binary "@somefile.qmasm" \
+     "http://localhost/?format=qubist&run=" > somefile.qmasm.out
+
+# translate the qmasm file into a qbsolv (.qubo) format "qmasm --format=qbsolv"
+curl -H 'Content-Type: text/plain' \
+      --data-binary "@somefile.qmasm" \
+      "http://localhost/?format=qbsolv" > somefile.qubo
 ```
 
 ### Examples using Python3
